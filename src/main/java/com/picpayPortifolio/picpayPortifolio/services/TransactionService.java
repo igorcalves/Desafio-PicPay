@@ -27,7 +27,10 @@ public class TransactionService {
     @Autowired
     private TransactionReposity repository;
 
-    public void createTransaction(TransactionDTO transaction) throws Exception {
+    @Autowired
+    private NotificationService notificationService;
+
+    public Transaction createTransaction(TransactionDTO transaction) throws Exception {
         User sender = this.userService.findUserById(transaction.senderId());
         User receiver = this.userService.findUserById((transaction.receiverId()));
 
@@ -38,11 +41,11 @@ public class TransactionService {
             throw new Exception("Transação não Autorizada");
         }
 
-        Transaction newtransaction = new Transaction();
-        newtransaction.setAmount(transaction.value());
-        newtransaction.setSender(sender);
-        newtransaction.setReceiver(receiver);
-        newtransaction.setTimestamp(LocalDateTime.now());
+        Transaction newTransaction = new Transaction();
+        newTransaction.setAmount(transaction.value());
+        newTransaction.setSender(sender);
+        newTransaction.setReceiver(receiver);
+        newTransaction.setTimestamp(LocalDateTime.now());
 
         sender.setBalance(sender.getBalance().subtract(transaction.value()));
         receiver.setBalance(receiver.getBalance().add(transaction.value()));
@@ -50,6 +53,13 @@ public class TransactionService {
         this.repository.save(new Transaction());
         this.userService.saveUser(sender);
         this.userService.saveUser(receiver);
+
+
+        this.notificationService.sendNotification(sender,"Transação realizada com sucesso");
+        this.notificationService.sendNotification(receiver,"Transação realizada com sucesso");
+
+
+        return newTransaction;
     }
 
 
