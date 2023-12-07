@@ -9,6 +9,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
@@ -41,6 +44,7 @@ public class TransactionService {
             throw new Exception("Transação não Autorizada");
         }
 
+
         Transaction newTransaction = new Transaction();
         newTransaction.setAmount(transaction.value());
         newTransaction.setSender(sender);
@@ -50,7 +54,7 @@ public class TransactionService {
         sender.setBalance(sender.getBalance().subtract(transaction.value()));
         receiver.setBalance(receiver.getBalance().add(transaction.value()));
 
-        this.repository.save(new Transaction());
+        this.repository.save(newTransaction);
         this.userService.saveUser(sender);
         this.userService.saveUser(receiver);
 
@@ -59,12 +63,23 @@ public class TransactionService {
         this.notificationService.sendNotification(receiver,"Transação realizada com sucesso");
 
 
+
         return newTransaction;
+
     }
 
 
     public boolean authorizeTransaction(User sender, BigDecimal value) {
-        ResponseEntity<Map> authorizationResponse = restTemplate.getForEntity("https://run.mocky.io/v3/5794d450-d2e2-4412-8131-73d0293ac1cc", Map.class);
+
+
+        ResponseEntity<Map> authorizationResponse = null;
+        try {
+            authorizationResponse = restTemplate.getForEntity("https://run.mocky.io/v3/5794d450-d2e2-4412-8131-73d0293ac1cc", Map.class);
+        } catch (ResourceAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+
         if (authorizationResponse.getStatusCode() == HttpStatus.OK) {
             String message = (String) authorizationResponse.getBody().get("message");
             return "Autorizado".equalsIgnoreCase(message);

@@ -7,6 +7,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.ResourceAccessException;
 
 @RestControllerAdvice
 public class ControllerExceptionHandler {
@@ -20,6 +21,13 @@ public class ControllerExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity threat404(EntityNotFoundException exception){
         return ResponseEntity.notFound().build();
+    }
+
+    @ExceptionHandler(ResourceAccessException.class)
+    public ResponseEntity serverError(ResourceAccessException exception){
+
+        ExceptionDTO exceptionDTO = new ExceptionDTO("Erro no arquivo","500");
+        return ResponseEntity.badRequest().body(exceptionDTO);
     }
 
     @ExceptionHandler(Exception.class)

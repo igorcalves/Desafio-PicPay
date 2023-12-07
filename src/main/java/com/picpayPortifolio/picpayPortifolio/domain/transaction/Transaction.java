@@ -2,6 +2,7 @@ package com.picpayPortifolio.picpayPortifolio.domain.transaction;
 
 
 import com.picpayPortifolio.picpayPortifolio.domain.user.User;
+import com.picpayPortifolio.picpayPortifolio.dtos.TransactionDTO;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @EqualsAndHashCode(of="id")
+@ToString
 public class Transaction {
 
     @Id
@@ -28,6 +30,7 @@ public class Transaction {
     @JoinColumn(name = "receiver_id")
     private User receiver;
     private LocalDateTime timestamp;
+
 
 
 }
